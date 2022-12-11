@@ -21,7 +21,7 @@ describe('/login', () => {
         })
 
         it('get otp should fail on user not found', async () => {
-            sinon.stub(user_queries, 'get_user').resolves({
+            sinon.stub(user_queries, 'get_user_by_email').resolves({
                 message: 'not found',
             })
 
@@ -33,7 +33,7 @@ describe('/login', () => {
         })
 
         it('get otp should fail on unsuccess while get_user', async () => {
-            sinon.stub(user_queries, 'get_user').resolves({
+            sinon.stub(user_queries, 'get_user_by_email').resolves({
                 message: 'unsuccess',
             })
             let response = await request(app)
@@ -44,7 +44,7 @@ describe('/login', () => {
         })
 
         it('get otp should fail on unsuccess while update_user', async () => {
-            sinon.stub(user_queries, 'get_user').resolves({
+            sinon.stub(user_queries, 'get_user_by_email').resolves({
                 name: 'naga',
                 email: 'pnaga234@gmail.com',
                 token: null,
@@ -62,7 +62,7 @@ describe('/login', () => {
         })
 
         it('get otp should fail on failing to send mail', async () => {
-            sinon.stub(user_queries, 'get_user').resolves({
+            sinon.stub(user_queries, 'get_user_by_email').resolves({
                 name: 'naga',
                 email: 'pnaga234@gmail.com',
                 token: null,
@@ -79,7 +79,7 @@ describe('/login', () => {
         })
 
         it('get otp should send success message', async () => {
-            sinon.stub(user_queries, 'get_user').resolves({
+            sinon.stub(user_queries, 'get_user_by_email').resolves({
                 name: 'naga',
                 email: 'pnaga234@gmail.com',
                 token: null,
@@ -96,7 +96,7 @@ describe('/login', () => {
         })
 
         it('get otp should fail on rejects', async () => {
-            sinon.stub(user_queries, 'get_user').rejects()
+            sinon.stub(user_queries, 'get_user_by_email').rejects()
             let response = await request(app)
                 .get('/login/getotp')
                 .send({ email: 'pnaga234@gmail.com' })
@@ -105,12 +105,12 @@ describe('/login', () => {
         })
     })
 
-    describe('/verify', () => {
+    describe.only('/verify', () => {
         afterEach(() => {
             sinon.restore()
         })
 
-        it('on invalid email and otp it should give error', async () => {
+        it('on invalid email and otp  should give error', async () => {
             const response: request.Response = await request(app)
                 .get('/login/verify')
                 .send({})
@@ -122,42 +122,30 @@ describe('/login', () => {
         })
 
         it('on user not found should get a response 404', async () => {
-            sinon
-                .stub(user_queries, 'get_user')
-                .resolves({ message: 'not found' })
+            sinon.stub(user_queries, 'get_user_by_email').resolves()
             const response: request.Response = await request(app)
                 .get('/login/verify')
-                .send({ email: 'pnaga234@gmail.com', otp: '112344' })
+                .send({ email: 'pnag234@gmail.com', otp: '112344' })
 
             expect(response.status).toBe(404)
-            expect(response.body.message).toBe('user not found')
-        })
-
-        it('on get user query unsuccess message should get 400 response', async () => {
-            sinon
-                .stub(user_queries, 'get_user')
-                .resolves({ message: 'unsuccess' })
-            const response: request.Response = await request(app)
-                .get('/login/verify')
-                .send({ email: 'pnaga234@gmail.com', otp: '112344' })
-
-            expect(response.status).toBe(400)
-            expect(response.body.message).toBe('email is not valid')
+            expect(response.body.message).toBe('user not found please register')
         })
 
         it('on token null should give 401 response', async () => {
-            sinon.stub(user_queries, 'get_user').resolves({ token: null })
+            sinon
+                .stub(user_queries, 'get_user_by_email')
+                .resolves({ token: null })
             const response: request.Response = await request(app)
                 .get('/login/verify')
                 .send({ email: 'pnaga234@gmail.com', otp: '112344' })
 
             expect(response.status).toBe(401)
-            expect(response.body.message).toBe('please enter click on get otp')
+            expect(response.body.message).toBe('please click on get otp')
         })
 
         it('on jwt token verify fail should give 401 response', async () => {
             sinon
-                .stub(user_queries, 'get_user')
+                .stub(user_queries, 'get_user_by_email')
                 .resolves({ message: 'success', token: 'hello babai' })
             sinon.stub(utils, 'verifyJWT').resolves(false)
             const response: request.Response = await request(app)
@@ -170,7 +158,7 @@ describe('/login', () => {
 
         it('on jwt token verify fail should give response', async () => {
             sinon
-                .stub(user_queries, 'get_user')
+                .stub(user_queries, 'get_user_by_email')
                 .resolves({ message: 'success', token: 'hello babai' })
             sinon.stub(utils, 'verifyJWT').resolves(false)
             const response: request.Response = await request(app)
@@ -183,7 +171,7 @@ describe('/login', () => {
 
         it('on correct details should give response 200', async () => {
             sinon
-                .stub(user_queries, 'get_user')
+                .stub(user_queries, 'get_user_by_email')
                 .resolves({ message: 'success', token: 'hello babai' })
             sinon.stub(utils, 'verifyJWT').returns({ otp: '112344' })
             const response: request.Response = await request(app)
@@ -195,9 +183,7 @@ describe('/login', () => {
         })
 
         it('on db fail should give 500 response', async () => {
-            sinon
-                .stub(user_queries, 'get_user')
-                .rejects({ message: 'success', token: 'hello babai' })
+            sinon.stub(user_queries, 'get_user_by_email').throwsException()
             sinon.stub(utils, 'verifyJWT').returns({ otp: '112344' })
             const response: request.Response = await request(app)
                 .get('/login/verify')
@@ -205,7 +191,7 @@ describe('/login', () => {
 
             expect(response.status).toBe(500)
             expect(response.body.message).toBe(
-                'something happened internally please try again'
+                'something went wrong internally'
             )
         })
     })

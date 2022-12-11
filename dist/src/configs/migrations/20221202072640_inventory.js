@@ -14,11 +14,11 @@ function up(knex) {
     return __awaiter(this, void 0, void 0, function* () {
         return knex.schema.createTable('inventory', (table) => {
             table
-                .uuid('id')
+                .uuid('inventory_id')
                 .defaultTo(knex.raw('gen_random_uuid()'))
                 .notNullable()
                 .primary();
-            table.string('name').notNullable().unique();
+            table.string('inventory_name').notNullable().unique();
             table.string('location').defaultTo('india');
             table.timestamps(true, true);
         });

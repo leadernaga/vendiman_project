@@ -13,35 +13,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const connection_1 = __importDefault(require("../../configs/connection"));
-function get_user(email) {
+function get_user_by_email(email) {
     return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const user = yield connection_1.default
-                .select('*')
-                .where('email', email)
-                .from('users')
-                .first();
-            if (!user.email) {
-                return { message: 'not found' };
-            }
-            return Object.assign(Object.assign({}, user), { message: 'success' });
-        }
-        catch (err) {
-            return { message: 'unsuccess' };
-        }
+        return yield connection_1.default.select('*').where('email', email).from('users').first();
     });
 }
 function update_user_token(email, token) {
     return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const user = yield (0, connection_1.default)('users')
-                .update({ token: token })
-                .where('email', email);
-            return Object.assign(Object.assign({}, user), { message: 'success' });
-        }
-        catch (err) {
-            return { message: 'unsuccess' };
-        }
+        return yield (0, connection_1.default)('users').update({ token: token }).where('email', email);
     });
 }
-exports.default = { get_user, update_user_token };
+function update_user_balance(email, balance) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return connection_1.default
+            .select('*')
+            .from('users')
+            .where('email', email)
+            .decrement('balance', balance);
+    });
+}
+exports.default = { get_user_by_email, update_user_token, update_user_balance };

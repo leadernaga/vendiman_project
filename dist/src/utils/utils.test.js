@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const sinon_1 = __importDefault(require("sinon"));
 const utils_1 = __importDefault(require("../utils/utils"));
-describe.only('utils', () => {
+describe('utils', () => {
     afterEach(() => {
         sinon_1.default.restore();
     });
@@ -43,20 +43,21 @@ describe.only('utils', () => {
         const result = utils_1.default.validateEmail('naga@gmail.com');
         expect(result).toBe(true);
     });
-    it('send mail should give message success ', () => __awaiter(void 0, void 0, void 0, function* () {
-        const result = yield utils_1.default.sendMail({
-            email: 'pluralsightvendiman@gmail.com',
-            username: 'naga',
-            otp: '12345',
-        });
-        expect(result.message).toBe('success');
-    }));
-    it('send mail should give message unsuccess on invalid mail ', () => __awaiter(void 0, void 0, void 0, function* () {
-        const result = yield utils_1.default.sendMail({
-            email: '',
-            otp: '',
-            username: '',
-        });
-        expect(result.message).toBe('unsuccess');
-    }));
+    // it('send mail should give message success ', async () => {
+    //     const result: any = await utils.sendMail({
+    //         email: 'pluralsightvendiman@gmail.com',
+    //         username: 'naga',
+    //         otp: '12345',
+    //     })
+    //     expect(result.message).toBe('success')
+    // })
+    // it('send mail should give message unsuccess on invalid mail ', async () => {
+    //     // jest.setTimeout(10000)
+    //     const result: any = await utils.sendMail({
+    //         email: '',
+    //         otp: '',
+    //         username: '',
+    //     })
+    //     expect(result.message).toBe('unsuccess')
+    // })
 });

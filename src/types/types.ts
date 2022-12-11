@@ -17,3 +17,10 @@ export interface jwtPayload {
 export interface nodemailer_response {
     message: string
 }
+
+export interface place_order {
+    item_ids: [string]
+    inventory_id: string
+    user_id: string
+    order_id: string
+}

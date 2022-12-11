@@ -23,6 +23,6 @@ describe('/ get', () => {
     it('on invalid route should get response 404', () => __awaiter(void 0, void 0, void 0, function* () {
         const response = yield (0, supertest_1.default)(index_1.default).get('/wrongroute');
         expect(response.status).toBe(404);
-        expect(response.body.message).toBe({ message: 'route not found' });
+        expect(response.body).toEqual({ message: 'route not found' });
     }));
 });

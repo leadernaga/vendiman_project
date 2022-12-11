@@ -14,7 +14,7 @@ function up(knex) {
     return __awaiter(this, void 0, void 0, function* () {
         return knex.schema.createTable('users', (table) => {
             table
-                .uuid('id')
+                .uuid('user_id')
                 .defaultTo(knex.raw('gen_random_uuid()'))
                 .primary()
                 .notNullable();

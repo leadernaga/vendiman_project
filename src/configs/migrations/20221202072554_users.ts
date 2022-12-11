@@ -3,7 +3,7 @@ import { Knex } from 'knex'
 export async function up(knex: Knex): Promise<void> {
     return knex.schema.createTable('users', (table) => {
         table
-            .uuid('id')
+            .uuid('user_id')
             .defaultTo(knex.raw('gen_random_uuid()'))
             .primary()
             .notNullable()

@@ -15,40 +15,43 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const user_queries_1 = __importDefault(require("../../queries/user_queries.ts/user_queries"));
 const otpGenerator = require('otp-generator');
 const utils_1 = __importDefault(require("../../utils/utils"));
+const user_services_1 = __importDefault(require("../../services/user_services/user_services"));
 require('dotenv').config();
-function login_user(req, res) {
+function login_user(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const { email, otp } = req.body;
         utils_1.default.log.info('user in login route');
         try {
-            if (!email || !otp) {
-                return res.status(400).send({
-                    message: 'please enter valid email and otp',
-                });
-            }
-            const user_data = yield user_queries_1.default.get_user(email);
-            if (user_data.message == 'not found') {
-                return res.status(404).send({ message: 'user not found' });
-            }
-            if (user_data.message == 'unsuccess') {
-                return res.status(400).send({ message: 'email is not valid' });
-            }
-            if (!user_data.token) {
-                return res
-                    .status(401)
-                    .send({ message: 'please enter click on get otp' });
-            }
-            const verify_otp = utils_1.default.verifyJWT(user_data.token);
-            if (verify_otp.otp != otp) {
-                return res.status(401).send({ message: 'please enter correct otp' });
-            }
-            const jwt = utils_1.default.generateJWT(email, otp, user_data.role);
+            // if (!email || !otp) {
+            //     return res.status(400).send({
+            //         message: 'please enter valid email and otp',
+            //     })
+            // }
+            // const user_data = await user_queries.get_user_by_email(email)
+            // if (user_data.message == 'not found') {
+            //     return res.status(404).send({ message: 'user not found' })
+            // }
+            // if (user_data.message == 'unsuccess') {
+            //     return res.status(400).send({ message: 'email is not valid' })
+            // }
+            // if (!user_data.token) {
+            //     return res
+            //         .status(401)
+            //         .send({ message: 'please enter click on get otp' })
+            // }
+            // const verify_otp = utils.verifyJWT(user_data.token) as JwtPayload
+            // if (verify_otp.otp != otp) {
+            //     return res.status(401).send({ message: 'please enter correct otp' })
+            // }
+            // const jwt = utils.generateJWT(email, otp, user_data.role,"1d")
+            const jwt = yield user_services_1.default.login_otp_verify(req);
             res.status(200).send({ message: 'success', token: jwt });
         }
         catch (err) {
-            res.status(500).send({
-                message: 'something happened internally please try again',
-            });
+            // res.status(500).send({
+            //     message: 'something happened internally please try again',
+            // })
+            next(err);
         }
     });
 }
@@ -61,7 +64,7 @@ function get_otp(req, res) {
                     .status(400)
                     .send({ message: 'please enter a valid email address' });
             }
-            const user_data = yield user_queries_1.default.get_user(email);
+            const user_data = yield user_queries_1.default.get_user_by_email(email);
             if (user_data.message === 'not found') {
                 return res.status(404).send({ message: 'user not found' });
             }

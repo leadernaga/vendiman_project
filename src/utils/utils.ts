@@ -73,6 +73,7 @@ async function sendMail(data: nodemailer_data_Type) {
                 otp: data.otp,
             }),
         })
+
         return { message: 'success' }
     } catch (e) {
         return { message: 'unsuccess' }

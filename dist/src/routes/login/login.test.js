@@ -30,7 +30,7 @@ describe('/login', () => {
             expect(response.body.message).toBe('please enter a valid email address');
         }));
         it('get otp should fail on user not found', () => __awaiter(void 0, void 0, void 0, function* () {
-            sinon_1.default.stub(user_queries_1.default, 'get_user').resolves({
+            sinon_1.default.stub(user_queries_1.default, 'get_user_by_email').resolves({
                 message: 'not found',
             });
             let response = yield (0, supertest_1.default)(index_1.default)
@@ -40,7 +40,7 @@ describe('/login', () => {
             expect(response.body.message).toBe('user not found');
         }));
         it('get otp should fail on unsuccess while get_user', () => __awaiter(void 0, void 0, void 0, function* () {
-            sinon_1.default.stub(user_queries_1.default, 'get_user').resolves({
+            sinon_1.default.stub(user_queries_1.default, 'get_user_by_email').resolves({
                 message: 'unsuccess',
             });
             let response = yield (0, supertest_1.default)(index_1.default)
@@ -50,7 +50,7 @@ describe('/login', () => {
             expect(response.body.message).toBe('please enter a valid email id');
         }));
         it('get otp should fail on unsuccess while update_user', () => __awaiter(void 0, void 0, void 0, function* () {
-            sinon_1.default.stub(user_queries_1.default, 'get_user').resolves({
+            sinon_1.default.stub(user_queries_1.default, 'get_user_by_email').resolves({
                 name: 'naga',
                 email: 'pnaga234@gmail.com',
                 token: null,
@@ -66,7 +66,7 @@ describe('/login', () => {
             expect(response.body.message).toBe('something happened internally');
         }));
         it('get otp should fail on failing to send mail', () => __awaiter(void 0, void 0, void 0, function* () {
-            sinon_1.default.stub(user_queries_1.default, 'get_user').resolves({
+            sinon_1.default.stub(user_queries_1.default, 'get_user_by_email').resolves({
                 name: 'naga',
                 email: 'pnaga234@gmail.com',
                 token: null,
@@ -80,7 +80,7 @@ describe('/login', () => {
             expect(response.body.message).toBe('cant able to sendmail');
         }));
         it('get otp should send success message', () => __awaiter(void 0, void 0, void 0, function* () {
-            sinon_1.default.stub(user_queries_1.default, 'get_user').resolves({
+            sinon_1.default.stub(user_queries_1.default, 'get_user_by_email').resolves({
                 name: 'naga',
                 email: 'pnaga234@gmail.com',
                 token: null,
@@ -94,7 +94,7 @@ describe('/login', () => {
             expect(response.body.message).toBe('successfully message sended');
         }));
         it('get otp should fail on rejects', () => __awaiter(void 0, void 0, void 0, function* () {
-            sinon_1.default.stub(user_queries_1.default, 'get_user').rejects();
+            sinon_1.default.stub(user_queries_1.default, 'get_user_by_email').rejects();
             let response = yield (0, supertest_1.default)(index_1.default)
                 .get('/login/getotp')
                 .send({ email: 'pnaga234@gmail.com' });
@@ -102,11 +102,11 @@ describe('/login', () => {
             expect(response.body.message).toBe('something happened internally');
         }));
     });
-    describe('/verify', () => {
+    describe.only('/verify', () => {
         afterEach(() => {
             sinon_1.default.restore();
         });
-        it('on invalid email and otp it should give error', () => __awaiter(void 0, void 0, void 0, function* () {
+        it('on invalid email and otp  should give error', () => __awaiter(void 0, void 0, void 0, function* () {
             const response = yield (0, supertest_1.default)(index_1.default)
                 .get('/login/verify')
                 .send({});
@@ -114,36 +114,26 @@ describe('/login', () => {
             expect(response.body.message).toBe('please enter valid email and otp');
         }));
         it('on user not found should get a response 404', () => __awaiter(void 0, void 0, void 0, function* () {
-            sinon_1.default
-                .stub(user_queries_1.default, 'get_user')
-                .resolves({ message: 'not found' });
+            sinon_1.default.stub(user_queries_1.default, 'get_user_by_email').resolves();
             const response = yield (0, supertest_1.default)(index_1.default)
                 .get('/login/verify')
-                .send({ email: 'pnaga234@gmail.com', otp: '112344' });
+                .send({ email: 'pnag234@gmail.com', otp: '112344' });
             expect(response.status).toBe(404);
-            expect(response.body.message).toBe('user not found');
-        }));
-        it('on get user query unsuccess message should get 400 response', () => __awaiter(void 0, void 0, void 0, function* () {
-            sinon_1.default
-                .stub(user_queries_1.default, 'get_user')
-                .resolves({ message: 'unsuccess' });
-            const response = yield (0, supertest_1.default)(index_1.default)
-                .get('/login/verify')
-                .send({ email: 'pnaga234@gmail.com', otp: '112344' });
-            expect(response.status).toBe(400);
-            expect(response.body.message).toBe('email is not valid');
+            expect(response.body.message).toBe('user not found please register');
         }));
         it('on token null should give 401 response', () => __awaiter(void 0, void 0, void 0, function* () {
-            sinon_1.default.stub(user_queries_1.default, 'get_user').resolves({ token: null });
+            sinon_1.default
+                .stub(user_queries_1.default, 'get_user_by_email')
+                .resolves({ token: null });
             const response = yield (0, supertest_1.default)(index_1.default)
                 .get('/login/verify')
                 .send({ email: 'pnaga234@gmail.com', otp: '112344' });
             expect(response.status).toBe(401);
-            expect(response.body.message).toBe('please enter click on get otp');
+            expect(response.body.message).toBe('please click on get otp');
         }));
         it('on jwt token verify fail should give 401 response', () => __awaiter(void 0, void 0, void 0, function* () {
             sinon_1.default
-                .stub(user_queries_1.default, 'get_user')
+                .stub(user_queries_1.default, 'get_user_by_email')
                 .resolves({ message: 'success', token: 'hello babai' });
             sinon_1.default.stub(utils_1.default, 'verifyJWT').resolves(false);
             const response = yield (0, supertest_1.default)(index_1.default)
@@ -154,7 +144,7 @@ describe('/login', () => {
         }));
         it('on jwt token verify fail should give response', () => __awaiter(void 0, void 0, void 0, function* () {
             sinon_1.default
-                .stub(user_queries_1.default, 'get_user')
+                .stub(user_queries_1.default, 'get_user_by_email')
                 .resolves({ message: 'success', token: 'hello babai' });
             sinon_1.default.stub(utils_1.default, 'verifyJWT').resolves(false);
             const response = yield (0, supertest_1.default)(index_1.default)
@@ -165,7 +155,7 @@ describe('/login', () => {
         }));
         it('on correct details should give response 200', () => __awaiter(void 0, void 0, void 0, function* () {
             sinon_1.default
-                .stub(user_queries_1.default, 'get_user')
+                .stub(user_queries_1.default, 'get_user_by_email')
                 .resolves({ message: 'success', token: 'hello babai' });
             sinon_1.default.stub(utils_1.default, 'verifyJWT').returns({ otp: '112344' });
             const response = yield (0, supertest_1.default)(index_1.default)
@@ -175,15 +165,13 @@ describe('/login', () => {
             expect(response.body.message).toBe('success');
         }));
         it('on db fail should give 500 response', () => __awaiter(void 0, void 0, void 0, function* () {
-            sinon_1.default
-                .stub(user_queries_1.default, 'get_user')
-                .rejects({ message: 'success', token: 'hello babai' });
+            sinon_1.default.stub(user_queries_1.default, 'get_user_by_email').throwsException();
             sinon_1.default.stub(utils_1.default, 'verifyJWT').returns({ otp: '112344' });
             const response = yield (0, supertest_1.default)(index_1.default)
                 .get('/login/verify')
                 .send({ email: 'pnaga234@gmail.com', otp: '112344' });
             expect(response.status).toBe(500);
-            expect(response.body.message).toBe('something happened internally please try again');
+            expect(response.body.message).toBe('something went wrong internally');
         }));
     });
 });

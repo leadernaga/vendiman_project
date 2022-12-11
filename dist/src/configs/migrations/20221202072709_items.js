@@ -14,11 +14,11 @@ function up(knex) {
     return __awaiter(this, void 0, void 0, function* () {
         return knex.schema.createTable('items', (table) => {
             table
-                .uuid('id')
+                .uuid('item_id')
                 .defaultTo(knex.raw('gen_random_uuid()'))
                 .primary()
                 .notNullable();
-            table.string('name').notNullable().unique();
+            table.string('item_name').notNullable().unique();
             table.string('category').notNullable();
             table.string('manifacturer').notNullable();
             table.string('description').nullable();
