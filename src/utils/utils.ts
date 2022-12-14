@@ -1,18 +1,17 @@
-import bunyan from 'bunyan'
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import nodemailer from 'nodemailer'
-import { jwtPayload, nodemailer_data_Type } from '../types/types'
-import { v4 as uuid } from 'uuid'
-const hbs: any = require('hbs')
-require('dotenv').config()
+import { nodemailer_data_Type } from '../types/types'
 
-const log = bunyan.createLogger({ name: 'vendiman', request_id: uuid() })
+const hbs: any = require('hbs')
+
+import dotenv from 'dotenv'
+dotenv.config()
 
 function generateJWT(
     email: string,
     otp: number | string,
     role: string,
-    expiresIn: string = '120000'
+    expiresIn = '5m'
 ) {
     return jwt.sign({ email, otp, role }, process.env.jwt_secret as string, {
         expiresIn: expiresIn,
@@ -37,13 +36,13 @@ function validateEmail(mail: string) {
     if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail)) {
         return true
     }
-    // alert("You have entered an invalid email address!")
+
     return false
 }
 
 async function sendMail(data: nodemailer_data_Type) {
     try {
-        let transport = nodemailer.createTransport({
+        const transport = nodemailer.createTransport({
             host: 'smtp.gmail.com',
             port: 587,
             secure: false,
@@ -64,7 +63,7 @@ async function sendMail(data: nodemailer_data_Type) {
 
         const template = hbs.compile(content)
 
-        let info = await transport.sendMail({
+        const info = await transport.sendMail({
             from: 'Vendiman Vendiman@gmail.com',
             to: data.email,
             subject: 'login OTP',
@@ -80,4 +79,4 @@ async function sendMail(data: nodemailer_data_Type) {
     }
 }
 
-export default { log, generateJWT, verifyJWT, validateEmail, sendMail }
+export default { generateJWT, verifyJWT, validateEmail, sendMail }

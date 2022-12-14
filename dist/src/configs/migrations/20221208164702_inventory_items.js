@@ -13,7 +13,8 @@ exports.down = exports.up = void 0;
 function up(knex) {
     return __awaiter(this, void 0, void 0, function* () {
         return knex.schema.alterTable('inventory_items', (table) => {
-            table.uuid('item_id').unique().notNullable().alter();
+            table.uuid('item_id').notNullable().alter();
+            table.unique(['inventory_id', 'item_id']);
         });
     });
 }

@@ -1,0 +1,275 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is vendiman backend API here you can purchase your favourite food products",
+        "version": "1.0.6",
+        "title": "vendiman",
+        "contact": { "email": "pluralisghtvendiman@gmail.com" }
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "tags": [
+        {
+            "name": "Authentication",
+            "description": "Everything about user login"
+        },
+        {
+            "name": "inventory",
+            "description": "Access to inventory orders and post items and filter search items"
+        }
+    ],
+    "schemes": ["http"],
+    "paths": {
+        "/login/sendotp": {
+            "post": {
+                "tags": ["Authentication"],
+                "summary": "send otp to user",
+                "description": "it will take email as input and send otp to user",
+                "operationId": "sendotp",
+                "produces": ["application/json", "application/xml"],
+                "parameters": [
+                    {
+                        "name": "email",
+                        "in": "body",
+                        "description": "Registered email for login",
+                        "required": true,
+                        "type": "string",
+                        "schema": {
+                            "$ref": "#/definitions/Email"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successfully message sended",
+                        "schema": { "type": "string" }
+                    },
+                    "400": {
+                        "description": "please provide valid email address or otp"
+                    }
+                }
+            }
+        },
+        "/login/verify": {
+            "post": {
+                "tags": ["Authentication"],
+                "summary": "to verify otp ",
+                "description": "it will take email and otp as input and send otp to user",
+                "operationId": "verifyotp",
+                "produces": ["application/json", "application/xml"],
+                "parameters": [
+                    {
+                        "name": "Email and otp",
+                        "in": "body",
+                        "description": "otp which is sended to email",
+                        "required": true,
+                        "type": "object",
+                        "schema": { "$ref": "#/definitions/Email and Otp" }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successfully loggedin",
+                        "schema": { "type": "string" }
+                    },
+                    "400": {
+                        "description": "please provide valid email address"
+                    }
+                }
+            }
+        },
+        "/inventory/list": {
+            "get": {
+                "tags": ["inventory"],
+                "summary": "Get all list of inventory list",
+                "description": "",
+                "operationId": "getInventoryList",
+                "produces": ["application/json", "application/xml"],
+                "responses": { "400": { "description": "Invalid input" } }
+            }
+        },
+        "/inventory/items": {
+            "post": {
+                "tags": ["inventory"],
+                "summary": "Post items on particular inventory",
+                "description": "need to post with correct items_ids and inventory_id",
+                "operationId": "postInventoryItems",
+                "produces": ["application/json", "application/xml"],
+                "parameters": [
+                    {
+                        "name": "Inventory Items",
+                        "in": "body",
+                        "description": "Need to post correct inventory_id and item_id and qty",
+                        "required": true,
+                        "type": "object",
+                        "schema": { "$ref": "#/definitions/Inventory Items" }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successfully posted items in inventory"
+                    },
+                    "400": { "description": "Invalid status value" }
+                },
+                "security": [{ "Bearer": ["write:items", "read:items"] }]
+            },
+            "put": {
+                "tags": ["inventory"],
+                "summary": "Post items on particular inventory",
+                "description": "need to post with correct items_ids and inventory_id",
+                "operationId": "putInventoryItems",
+                "produces": ["application/json", "application/xml"],
+                "parameters": [
+                    {
+                        "name": "Inventory Items",
+                        "in": "body",
+                        "description": "Need to post correct inventory_id and item_id and qty",
+                        "required": true,
+                        "type": "object",
+                        "schema": { "$ref": "#/definitions/Inventory Items" }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successfully posted items in inventory"
+                    },
+                    "400": { "description": "Invalid status value" }
+                },
+                "security": [{ "Bearer": ["write:items", "read:items"] }]
+            }
+        },
+        "/inventory/items/place_order": {
+            "post": {
+                "tags": ["inventory"],
+                "summary": "Place order from perticular inventory",
+                "description": "User can purchase his favourite food items",
+                "operationId": "placeOrder",
+                "produces": ["application/json", "application/xml"],
+                "parameters": [
+                    {
+                        "name": "Inventory Items",
+                        "in": "body",
+                        "description": "Need to post correct inventory_id and item_id and qty",
+                        "required": true,
+                        "type": "object",
+                        "schema": { "$ref": "#/definitions/Inventory Items" }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful order",
+                        "schema": {
+                            "type": "object",
+                            "items": { "$ref": "#/definitions/Inventory Items" }
+                        }
+                    },
+                    "400": { "description": "Invalid tag value" }
+                },
+                "security": [{ "Bearer": ["write:order", "read:order"] }]
+            }
+        },
+        "/inventory/search": {
+            "get": {
+                "tags": ["inventory"],
+                "summary": "Search items in inventory",
+                "description": "Gives searched items in inventory",
+                "operationId": "searchItems",
+                "produces": ["application/json", "application/xml"],
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "search by query",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation"
+                    },
+                    "400": { "description": "Invalid query supplied" }
+                },
+                "security": [
+                    { "inventory_id": ["write:search", "read:search"] }
+                ]
+            }
+        },
+        "/inventory/filter": {
+            "get": {
+                "tags": ["inventory"],
+                "summary": "Search items in inventory",
+                "description": "Gives searched items in inventory",
+                "operationId": "filterItems",
+                "produces": ["application/json", "application/xml"],
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "filter by name",
+                        "type": "string"
+                    },
+                    {
+                        "name": "category",
+                        "in": "query",
+                        "description": "filter by category",
+                        "type": "string"
+                    },
+                    {
+                        "name": "price",
+                        "in": "query",
+                        "description": "filter by price",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation"
+                    },
+                    "400": { "description": "Invalid query supplied" }
+                },
+                "security": [
+                    { "inventory_id": ["write:search", "read:search"] }
+                ]
+            }
+        }
+    },
+    "securityDefinitions": {
+        "Bearer": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header",
+            "description": "Enter the token with the `Bearer: ` prefix, e.g. Bearer abcde12345"
+        },
+        "inventory_id": {
+            "type": "apiKey",
+            "name": "inventory_id",
+            "in": "header",
+            "description": "Enter valid inventory id"
+        }
+    },
+    "definitions": {
+        "Email": {
+            "type": "object",
+            "properties": {
+                "email": { "type": "string", "example": "pnaga234@gmail.com" }
+            }
+        },
+        "Email and Otp": {
+            "type": "object",
+            "properties": {
+                "email": { "type": "string", "email": "pnaga234@gmail.com" },
+                "otp": { "type": "string", "example": "1234" }
+            }
+        },
+        "Inventory id": {
+            "type": "object",
+            "properties": {
+                "inventory_id": {
+                    "type": "string",
+                    "example": "71a94ba9-d9cd-4126-b759-f86a1f7003f4"
+                }
+            }
+        }
+    }
+}

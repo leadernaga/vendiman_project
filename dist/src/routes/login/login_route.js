@@ -6,6 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const user_controllers_1 = __importDefault(require("../../controllers/user_controllers/user_controllers"));
 const route = (0, express_1.Router)();
-route.get('/verify', user_controllers_1.default.login_user);
-route.get("/getotp", user_controllers_1.default.get_otp);
+// utils.log.info('balle balle')
+// console.log(logger.info(""), 'loggere')
+route.post('/verify', user_controllers_1.default.verify_otp);
+route.post('/sendotp', user_controllers_1.default.send_otp);
 exports.default = route;

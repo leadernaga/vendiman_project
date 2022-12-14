@@ -12,93 +12,38 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const user_queries_1 = __importDefault(require("../../queries/user_queries.ts/user_queries"));
-const otpGenerator = require('otp-generator');
-const utils_1 = __importDefault(require("../../utils/utils"));
 const user_services_1 = __importDefault(require("../../services/user_services/user_services"));
-require('dotenv').config();
-function login_user(req, res, next) {
+const status_codes_1 = __importDefault(require("../../utils/Errors/status_codes"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
+function verify_otp(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { email, otp } = req.body;
-        utils_1.default.log.info('user in login route');
+        req.logger.info('user in user_controllers verify');
         try {
-            // if (!email || !otp) {
-            //     return res.status(400).send({
-            //         message: 'please enter valid email and otp',
-            //     })
-            // }
-            // const user_data = await user_queries.get_user_by_email(email)
-            // if (user_data.message == 'not found') {
-            //     return res.status(404).send({ message: 'user not found' })
-            // }
-            // if (user_data.message == 'unsuccess') {
-            //     return res.status(400).send({ message: 'email is not valid' })
-            // }
-            // if (!user_data.token) {
-            //     return res
-            //         .status(401)
-            //         .send({ message: 'please enter click on get otp' })
-            // }
-            // const verify_otp = utils.verifyJWT(user_data.token) as JwtPayload
-            // if (verify_otp.otp != otp) {
-            //     return res.status(401).send({ message: 'please enter correct otp' })
-            // }
-            // const jwt = utils.generateJWT(email, otp, user_data.role,"1d")
             const jwt = yield user_services_1.default.login_otp_verify(req);
+            req.logger.info('user_services login_otp_verify success and sending response to user');
             res.status(200).send({ message: 'success', token: jwt });
         }
         catch (err) {
-            // res.status(500).send({
-            //     message: 'something happened internally please try again',
-            // })
+            req.logger.info('user_services verify_otp got error');
             next(err);
         }
     });
 }
-function get_otp(req, res) {
+function send_otp(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { email } = req.body;
+        req.logger.info('user in send otp controller');
         try {
-            if (!email || !utils_1.default.validateEmail(email)) {
-                return res
-                    .status(400)
-                    .send({ message: 'please enter a valid email address' });
-            }
-            const user_data = yield user_queries_1.default.get_user_by_email(email);
-            if (user_data.message === 'not found') {
-                return res.status(404).send({ message: 'user not found' });
-            }
-            if (user_data.message == 'unsuccess') {
-                return res
-                    .status(400)
-                    .send({ message: 'please enter a valid email id' });
-            }
-            const otp = otpGenerator.generate(6, {
-                upperCaseAlphabets: false,
-                specialChars: false,
+            yield user_services_1.default.send_otp_service(req);
+            req.logger.info('user services successfull sending response 200 to user');
+            res.status(status_codes_1.default.ok).send({
+                message: 'successfully message sended',
             });
-            const token = utils_1.default.generateJWT(user_data.email, otp, user_data.role);
-            let update_result = yield user_queries_1.default.update_user_token(email, token);
-            if (update_result.message == 'unsuccess') {
-                return res
-                    .status(500)
-                    .send({ message: 'something happened internally' });
-            }
-            const result = yield utils_1.default.sendMail({
-                email,
-                otp,
-                username: user_data.name,
-            });
-            if (result.message === 'unsuccess') {
-                return res.status(500).send({
-                    message: 'cant able to sendmail',
-                });
-            }
-            res.status(200).send({ message: 'successfully message sended' });
         }
         catch (err) {
-            res.status(500).send({ message: 'something happened internally' });
+            req.logger.error('user control got an error');
+            next(err);
         }
     });
 }
-exports.default = { login_user, get_otp };
+exports.default = { verify_otp, send_otp };

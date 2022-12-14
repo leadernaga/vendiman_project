@@ -1,4 +1,3 @@
-import sinon from 'sinon'
 import request from 'supertest'
 import app from './index'
 
@@ -6,6 +5,7 @@ describe('/ get', () => {
 
 
     it('on / get route should give 200 response', async () => {
+
         const response = await request(app).get('/')
 
         expect(response.status).toBe(200)

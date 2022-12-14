@@ -2,7 +2,7 @@ import type { Knex } from 'knex'
 
 // Update with your config settings.
 
-const path = require('path')
+import path from "path"
 
 const BASE_PATH = path.join(__dirname, 'src', 'configs')
 

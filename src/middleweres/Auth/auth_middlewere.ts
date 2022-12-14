@@ -1,9 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import { JwtPayload } from 'jsonwebtoken'
-import knex from 'knex'
 import utils from '../../utils/utils'
-import schema_validation from '../../utils/validations/schema_validations'
-import Joi from 'joi'
+
 
 async function auth_middlewere(
     req: Request,
@@ -29,6 +27,7 @@ async function auth_middlewere(
 
         next()
     } catch (err) {
+        
         return res.status(500).send({ message: 'something went wrong' })
     }
 }
@@ -38,8 +37,6 @@ async function admin_middlewere(
     res: Response,
     next: NextFunction
 ) {
-   
-
     const token = req.headers.authorization?.split(' ')[1]
 
     try {

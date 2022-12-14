@@ -97,6 +97,36 @@ describe('inventory', () => {
             expect(response.status).toBe(500);
             expect(response.body.message).toBe('something went wrong internally');
         }));
+        it('should get response 500 on database fail error', () => __awaiter(void 0, void 0, void 0, function* () {
+            sinon_1.default.stub(utils_1.default, 'verifyJWT').returns({ role: 'admin' });
+            sinon_1.default
+                .stub(inventory_items_queries_1.default, 'post_items_on_inventory')
+                .resolves(new Error('h'));
+            const response = yield (0, supertest_1.default)(index_1.default)
+                .post('/inventory/items')
+                .send({
+                inventory_id: 'expample',
+                item_ids: [{ item_id: '123', qty: 10 }],
+            })
+                .set('Authorization', 'bearer 1234');
+            expect(response.status).toBe(500);
+            expect(response.body.message).toBe('something went wrong internally');
+        }));
+        it('should get response 400 on providing ivalid details to database', () => __awaiter(void 0, void 0, void 0, function* () {
+            sinon_1.default.stub(utils_1.default, 'verifyJWT').returns({ role: 'admin' });
+            sinon_1.default
+                .stub(inventory_items_queries_1.default, 'post_items_on_inventory')
+                .resolves({ code: '22P02' });
+            const response = yield (0, supertest_1.default)(index_1.default)
+                .post('/inventory/items')
+                .send({
+                inventory_id: 'expample',
+                item_ids: [{ item_id: '123', qty: 10 }],
+            })
+                .set('Authorization', 'bearer 1234');
+            expect(response.status).toBe(400);
+            expect(response.body.message).toBe('please provide valid details');
+        }));
         it('should get response 500 on post fail', () => __awaiter(void 0, void 0, void 0, function* () {
             sinon_1.default.stub(utils_1.default, 'verifyJWT').returns({ role: 'admin' });
             sinon_1.default
@@ -113,7 +143,7 @@ describe('inventory', () => {
             expect(response.body.message).toBe('something went wrong internally');
         }));
     });
-    describe('get /inventory', () => {
+    describe('get /inventory/list', () => {
         afterEach(() => {
             sinon_1.default.restore();
         });
@@ -121,13 +151,13 @@ describe('inventory', () => {
             sinon_1.default
                 .stub(inventory_queries_1.default, 'getInventoryList')
                 .resolves({ data: [''], message: 'success' });
-            const response = yield (0, supertest_1.default)(index_1.default).get('/inventory');
+            const response = yield (0, supertest_1.default)(index_1.default).get('/inventory/list');
             expect(response.status).toBe(200);
             expect(response.body.message).toBe('success');
         }));
         it('should give response 500 on query fail', () => __awaiter(void 0, void 0, void 0, function* () {
             sinon_1.default.stub(inventory_queries_1.default, 'getInventoryList').rejects();
-            const response = yield (0, supertest_1.default)(index_1.default).get('/inventory');
+            const response = yield (0, supertest_1.default)(index_1.default).get('/inventory/list');
             // expect(response.status).toBe(500)
             expect(response.body.message).toBe('something went wrong internally');
         }));

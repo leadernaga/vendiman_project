@@ -3,10 +3,7 @@ import sinon from 'sinon'
 import app from '../../index'
 // import inventory_queries from '../../queries/item_queries/inventory_queries'
 import user_queries from '../../queries/user_queries.ts/user_queries'
-import auth_middlewere from '../../middleweres/Auth/auth_middlewere'
-import { NextFunction, Request, Response } from 'express'
 import utils from '../../utils/utils'
-import inventory_queries from '../../queries/inventory_queries/inventory_queries'
 import inventory_items_queries from '../../queries/inventory_items_queries/inventory_items_queries'
 
 describe('inventory', () => {
@@ -29,7 +26,7 @@ describe('inventory', () => {
         it('should need to give an error on empty query', async () => {
             const response = await request(app)
                 .get('/inventory/filter')
-                .send({ inventory_id: 'q23434' })
+                .set('inventory_id', '12345')
 
             expect(response.status).toBe(400)
             expect(response.body.message).toBe(
@@ -41,7 +38,7 @@ describe('inventory', () => {
             sinon.stub(inventory_items_queries, 'filter_items').resolves({})
             const response = await request(app)
                 .get('/inventory/filter?name=man')
-                .send({ inventory_id: '12334' })
+                .set('inventory_id', '12345')
             // console.log(response.body)
             expect(response.status).toBe(404)
             expect(response.body.message).toBe('no result found on filter')
@@ -53,7 +50,7 @@ describe('inventory', () => {
                 .throwsException()
             const response = await request(app)
                 .get('/inventory/filter?name=man')
-                .send({ inventory_id: '12334' })
+                .set('inventory_id', '12345')
             // console.log(response.body)
             expect(response.status).toBe(500)
             expect(response.body.message).toBe(
@@ -67,8 +64,8 @@ describe('inventory', () => {
                 .resolves({ name: 'mango' })
             const response = await request(app)
                 .get('/inventory/filter?name=man')
-                .send({ inventory_id: '12334' })
-            // console.log(response.body)
+                .set('inventory_id', '12345')
+
             expect(response.body.data.name).toBe('mango')
             expect(response.body.message).toBe('success')
         })
@@ -80,9 +77,7 @@ describe('inventory', () => {
         })
 
         it('should get response 400 on empty inventory id', async () => {
-            const response = await request(app)
-                .get('/inventory/search')
-                .send({})
+            const response = await request(app).get('/inventory/search')
 
             expect(response.status).toBe(400)
             expect(response.body.message).toBe(
@@ -94,7 +89,7 @@ describe('inventory', () => {
             sinon.stub(inventory_items_queries, 'search_items').resolves([])
             const response = await request(app)
                 .get('/inventory/search?q=namaste')
-                .send({ inventory_id: '12345' })
+                .set('inventory_id', '12345')
 
             expect(response.status).toBe(404)
             expect(response.body.message).toBe(
@@ -108,8 +103,8 @@ describe('inventory', () => {
                 .resolves([{ name: 'naga' }])
             const response = await request(app)
                 .get('/inventory/search?q=namaste')
-                .send({ inventory_id: '12345' })
-
+                .set('inventory_id', '12345')
+            
             expect(response.status).toBe(200)
             expect(response.body.data).toMatchObject([{ name: 'naga' }])
         })
@@ -120,7 +115,7 @@ describe('inventory', () => {
                 .throwsException()
             const response = await request(app)
                 .get('/inventory/search?q=namaste')
-                .send({ inventory_id: '12345' })
+                .set('inventory_id', '12345')
 
             expect(response.status).toBe(500)
             expect(response.body.message).toBe(
@@ -135,7 +130,7 @@ describe('inventory', () => {
         })
         it('should give respons 401 on not provideing jwt token', async () => {
             const response = await request(app)
-                .post('/inventory/place_order')
+                .post('/inventory/items/place_order')
                 .send({
                     inventory_id: '1234',
                     item_ids: [{ item_id: '1234', qty: 5 }],
@@ -147,7 +142,7 @@ describe('inventory', () => {
 
         it('should give respons 401 on not providing jwt token', async () => {
             const response = await request(app)
-                .post('/inventory/place_order')
+                .post('/inventory/items/place_order')
                 .send({
                     inventory_id: '1234',
                     item_ids: [{ item_id: '1234', qty: 5 }],
@@ -163,8 +158,9 @@ describe('inventory', () => {
         it('should give respons 500 on jwt throw Exception', async () => {
             sinon.stub(utils, 'verifyJWT').throwsException()
             const response = await request(app)
-                .post('/inventory/place_order')
+                .post('/inventory/items/place_order')
                 .set('authorization', 'bearer wrongtoken')
+                .send({ inventory_id: '12345' })
 
             expect(response.status).toBe(500)
             expect(response.body.message).toBe('something went wrong')
@@ -173,7 +169,7 @@ describe('inventory', () => {
         it('should give respons 400 on invalid details item_ids:string', async () => {
             sinon.stub(utils, 'verifyJWT').resolves()
             const response = await request(app)
-                .post('/inventory/place_order')
+                .post('/inventory/items/place_order')
                 .set('authorization', 'bearer wrongtoken')
                 .send({ inventory_id: '1234', item_ids: '123' })
 
@@ -184,7 +180,7 @@ describe('inventory', () => {
         it('should give respons 400 on invalid details item_id:string ', async () => {
             sinon.stub(utils, 'verifyJWT').resolves()
             const response = await request(app)
-                .post('/inventory/place_order')
+                .post('/inventory/items/place_order')
                 .set('authorization', 'bearer wrongtoken')
                 .send({ inventory_id: '1234', item_ids: [''] })
 
@@ -197,7 +193,7 @@ describe('inventory', () => {
         it('should give respons 400 on invalid details on not prividing item:id in object ', async () => {
             sinon.stub(utils, 'verifyJWT').resolves()
             const response = await request(app)
-                .post('/inventory/place_order')
+                .post('/inventory/items/place_order')
                 .set('authorization', 'bearer wrongtoken')
                 .send({ inventory_id: '1234', item_ids: [{ item_i: '122' }] })
 
@@ -210,7 +206,7 @@ describe('inventory', () => {
         it('should give respons 400 on invalid details  on not providing quantity ', async () => {
             sinon.stub(utils, 'verifyJWT').resolves()
             const response = await request(app)
-                .post('/inventory/place_order')
+                .post('/inventory/items/place_order')
                 .set('authorization', 'bearer wrongtoken')
                 .send({ inventory_id: '1234', item_ids: [{ item_id: '122' }] })
 
@@ -221,7 +217,7 @@ describe('inventory', () => {
         it('should give respons 400 on wrong data type of item_id ', async () => {
             sinon.stub(utils, 'verifyJWT').resolves()
             const response = await request(app)
-                .post('/inventory/place_order')
+                .post('/inventory/items/place_order')
                 .set('authorization', 'bearer wrongtoken')
                 .send({
                     inventory_id: '1234',
@@ -237,7 +233,7 @@ describe('inventory', () => {
         it('should give respons 400 on wrong data type of qty ', async () => {
             sinon.stub(utils, 'verifyJWT').resolves()
             const response = await request(app)
-                .post('/inventory/place_order')
+                .post('/inventory/items/place_order')
                 .set('authorization', 'bearer wrongtoken')
                 .send({
                     inventory_id: '1234',
@@ -260,7 +256,7 @@ describe('inventory', () => {
                 ])
 
             const response = await request(app)
-                .post('/inventory/place_order')
+                .post('/inventory/items/place_order')
                 .set('authorization', 'bearer wrongtoken')
                 .send({
                     inventory_id: '123',
@@ -285,7 +281,7 @@ describe('inventory', () => {
                 ])
 
             const response = await request(app)
-                .post('/inventory/place_order')
+                .post('/inventory/items/place_order')
                 .set('authorization', 'bearer wrongtoken')
                 .send({
                     inventory_id: '123',
@@ -316,7 +312,7 @@ describe('inventory', () => {
             sinon.stub(user_queries, 'update_user_balance').resolves()
 
             const response = await request(app)
-                .post('/inventory/place_order')
+                .post('/inventory/items/place_order')
                 .set('authorization', 'bearer wrongtoken')
                 .send({
                     inventory_id: '123',
@@ -331,7 +327,7 @@ describe('inventory', () => {
             sinon.stub(utils, 'verifyJWT').resolves()
             sinon.stub(user_queries, 'get_user_by_email').throwsException()
             const response = await request(app)
-                .post('/inventory/place_order')
+                .post('/inventory/items/place_order')
                 .set('authorization', 'bearer wrongtoken')
                 .send({
                     inventory_id: '1234',

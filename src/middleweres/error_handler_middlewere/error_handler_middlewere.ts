@@ -16,13 +16,11 @@ async function error_handler_middlewere(
         message = error.message
     }
 
-  
     if (error) {
         return res
             .status(error.status || status_codes.internal_error)
             .send({ message })
     }
-    next()
 }
 
 export default error_handler_middlewere

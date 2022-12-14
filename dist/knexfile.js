@@ -1,8 +1,11 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 // Update with your config settings.
-const path = require('path');
-const BASE_PATH = path.join(__dirname, 'src', 'configs');
+const path_1 = __importDefault(require("path"));
+const BASE_PATH = path_1.default.join(__dirname, 'src', 'configs');
 const config = {
     development: {
         client: 'pg',
@@ -14,10 +17,10 @@ const config = {
             database: 'vendiman',
         },
         migrations: {
-            directory: path.join(BASE_PATH, 'migrations'),
+            directory: path_1.default.join(BASE_PATH, 'migrations'),
         },
         seeds: {
-            directory: path.join(BASE_PATH, 'seeds'),
+            directory: path_1.default.join(BASE_PATH, 'seeds'),
         },
     },
     test: {
@@ -30,10 +33,10 @@ const config = {
             database: 'vendiman',
         },
         migrations: {
-            directory: path.join(BASE_PATH, 'migrations'),
+            directory: path_1.default.join(BASE_PATH, 'migrations'),
         },
         seeds: {
-            directory: path.join(BASE_PATH, 'seeds'),
+            directory: path_1.default.join(BASE_PATH, 'seeds'),
         },
     },
 };

@@ -10,8 +10,30 @@ const inventory_route_1 = __importDefault(require("./routes/inventory/inventory.
 const items_route_1 = __importDefault(require("./routes/items/items_route"));
 require("dotenv/config");
 const error_handler_middlewere_1 = __importDefault(require("./middleweres/error_handler_middlewere/error_handler_middlewere"));
+const bunyan_1 = __importDefault(require("bunyan"));
+const uuid_1 = require("uuid");
+const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
+const swagger_documentation_json_1 = __importDefault(require("./Docs/swagger_documentation.json"));
 const app = (0, express_1.default)();
-//middleweres
+// //middleweres
+app.use((req, res, next) => {
+    if (req.method !== 'GET') {
+        if (req.headers['content-type'] !== 'application/json') {
+            return res.status(400).send('please provide json type only');
+        }
+    }
+    next();
+});
+app.use('/api-docs', swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swagger_documentation_json_1.default));
+//setting logger on req
+app.use((req, res, next) => {
+    const logger = bunyan_1.default.createLogger({
+        name: 'vendiman',
+        request_id: (0, uuid_1.v4)(),
+    });
+    req.logger = logger;
+    next();
+});
 app.use(express_1.default.json());
 app.use((0, cors_1.default)());
 app.get('/', (req, res) => {

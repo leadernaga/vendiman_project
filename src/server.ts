@@ -1,5 +1,4 @@
 import app from './index'
-import utils from './utils/utils'
 import 'dotenv/config'
 
 const port =
@@ -10,5 +9,5 @@ const port =
 // console.log(process.env.DB_URL, "Server ");
 
 app.listen(port, () => {
-    utils.log.info(`Server is running on http://localhost:${port}`)
+    console.log(`Server is running on http://localhost:${port}`)
 })

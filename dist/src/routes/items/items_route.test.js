@@ -34,7 +34,7 @@ describe('inventory', () => {
         it('should need to give an error on empty query', () => __awaiter(void 0, void 0, void 0, function* () {
             const response = yield (0, supertest_1.default)(index_1.default)
                 .get('/inventory/filter')
-                .send({ inventory_id: 'q23434' });
+                .set('inventory_id', '12345');
             expect(response.status).toBe(400);
             expect(response.body.message).toBe('please filter on field name or category or price');
         }));
@@ -42,7 +42,7 @@ describe('inventory', () => {
             sinon_1.default.stub(inventory_items_queries_1.default, 'filter_items').resolves({});
             const response = yield (0, supertest_1.default)(index_1.default)
                 .get('/inventory/filter?name=man')
-                .send({ inventory_id: '12334' });
+                .set('inventory_id', '12345');
             // console.log(response.body)
             expect(response.status).toBe(404);
             expect(response.body.message).toBe('no result found on filter');
@@ -53,7 +53,7 @@ describe('inventory', () => {
                 .throwsException();
             const response = yield (0, supertest_1.default)(index_1.default)
                 .get('/inventory/filter?name=man')
-                .send({ inventory_id: '12334' });
+                .set('inventory_id', '12345');
             // console.log(response.body)
             expect(response.status).toBe(500);
             expect(response.body.message).toBe('something went wrong internally');
@@ -64,8 +64,7 @@ describe('inventory', () => {
                 .resolves({ name: 'mango' });
             const response = yield (0, supertest_1.default)(index_1.default)
                 .get('/inventory/filter?name=man')
-                .send({ inventory_id: '12334' });
-            // console.log(response.body)
+                .set('inventory_id', '12345');
             expect(response.body.data.name).toBe('mango');
             expect(response.body.message).toBe('success');
         }));
@@ -75,9 +74,7 @@ describe('inventory', () => {
             sinon_1.default.restore();
         });
         it('should get response 400 on empty inventory id', () => __awaiter(void 0, void 0, void 0, function* () {
-            const response = yield (0, supertest_1.default)(index_1.default)
-                .get('/inventory/search')
-                .send({});
+            const response = yield (0, supertest_1.default)(index_1.default).get('/inventory/search');
             expect(response.status).toBe(400);
             expect(response.body.message).toBe('please provide valid inventory_id');
         }));
@@ -85,7 +82,7 @@ describe('inventory', () => {
             sinon_1.default.stub(inventory_items_queries_1.default, 'search_items').resolves([]);
             const response = yield (0, supertest_1.default)(index_1.default)
                 .get('/inventory/search?q=namaste')
-                .send({ inventory_id: '12345' });
+                .set('inventory_id', '12345');
             expect(response.status).toBe(404);
             expect(response.body.message).toBe('no result found on search query');
         }));
@@ -95,7 +92,7 @@ describe('inventory', () => {
                 .resolves([{ name: 'naga' }]);
             const response = yield (0, supertest_1.default)(index_1.default)
                 .get('/inventory/search?q=namaste')
-                .send({ inventory_id: '12345' });
+                .set('inventory_id', '12345');
             expect(response.status).toBe(200);
             expect(response.body.data).toMatchObject([{ name: 'naga' }]);
         }));
@@ -105,7 +102,7 @@ describe('inventory', () => {
                 .throwsException();
             const response = yield (0, supertest_1.default)(index_1.default)
                 .get('/inventory/search?q=namaste')
-                .send({ inventory_id: '12345' });
+                .set('inventory_id', '12345');
             expect(response.status).toBe(500);
             expect(response.body.message).toBe('something went wrong internally');
         }));
@@ -116,7 +113,7 @@ describe('inventory', () => {
         });
         it('should give respons 401 on not provideing jwt token', () => __awaiter(void 0, void 0, void 0, function* () {
             const response = yield (0, supertest_1.default)(index_1.default)
-                .post('/inventory/place_order')
+                .post('/inventory/items/place_order')
                 .send({
                 inventory_id: '1234',
                 item_ids: [{ item_id: '1234', qty: 5 }],
@@ -126,7 +123,7 @@ describe('inventory', () => {
         }));
         it('should give respons 401 on not providing jwt token', () => __awaiter(void 0, void 0, void 0, function* () {
             const response = yield (0, supertest_1.default)(index_1.default)
-                .post('/inventory/place_order')
+                .post('/inventory/items/place_order')
                 .send({
                 inventory_id: '1234',
                 item_ids: [{ item_id: '1234', qty: 5 }],
@@ -138,15 +135,16 @@ describe('inventory', () => {
         it('should give respons 500 on jwt throw Exception', () => __awaiter(void 0, void 0, void 0, function* () {
             sinon_1.default.stub(utils_1.default, 'verifyJWT').throwsException();
             const response = yield (0, supertest_1.default)(index_1.default)
-                .post('/inventory/place_order')
-                .set('authorization', 'bearer wrongtoken');
+                .post('/inventory/items/place_order')
+                .set('authorization', 'bearer wrongtoken')
+                .send({ inventory_id: '12345' });
             expect(response.status).toBe(500);
             expect(response.body.message).toBe('something went wrong');
         }));
         it('should give respons 400 on invalid details item_ids:string', () => __awaiter(void 0, void 0, void 0, function* () {
             sinon_1.default.stub(utils_1.default, 'verifyJWT').resolves();
             const response = yield (0, supertest_1.default)(index_1.default)
-                .post('/inventory/place_order')
+                .post('/inventory/items/place_order')
                 .set('authorization', 'bearer wrongtoken')
                 .send({ inventory_id: '1234', item_ids: '123' });
             expect(response.status).toBe(400);
@@ -155,7 +153,7 @@ describe('inventory', () => {
         it('should give respons 400 on invalid details item_id:string ', () => __awaiter(void 0, void 0, void 0, function* () {
             sinon_1.default.stub(utils_1.default, 'verifyJWT').resolves();
             const response = yield (0, supertest_1.default)(index_1.default)
-                .post('/inventory/place_order')
+                .post('/inventory/items/place_order')
                 .set('authorization', 'bearer wrongtoken')
                 .send({ inventory_id: '1234', item_ids: [''] });
             expect(response.status).toBe(400);
@@ -164,7 +162,7 @@ describe('inventory', () => {
         it('should give respons 400 on invalid details on not prividing item:id in object ', () => __awaiter(void 0, void 0, void 0, function* () {
             sinon_1.default.stub(utils_1.default, 'verifyJWT').resolves();
             const response = yield (0, supertest_1.default)(index_1.default)
-                .post('/inventory/place_order')
+                .post('/inventory/items/place_order')
                 .set('authorization', 'bearer wrongtoken')
                 .send({ inventory_id: '1234', item_ids: [{ item_i: '122' }] });
             expect(response.status).toBe(400);
@@ -173,7 +171,7 @@ describe('inventory', () => {
         it('should give respons 400 on invalid details  on not providing quantity ', () => __awaiter(void 0, void 0, void 0, function* () {
             sinon_1.default.stub(utils_1.default, 'verifyJWT').resolves();
             const response = yield (0, supertest_1.default)(index_1.default)
-                .post('/inventory/place_order')
+                .post('/inventory/items/place_order')
                 .set('authorization', 'bearer wrongtoken')
                 .send({ inventory_id: '1234', item_ids: [{ item_id: '122' }] });
             expect(response.status).toBe(400);
@@ -182,7 +180,7 @@ describe('inventory', () => {
         it('should give respons 400 on wrong data type of item_id ', () => __awaiter(void 0, void 0, void 0, function* () {
             sinon_1.default.stub(utils_1.default, 'verifyJWT').resolves();
             const response = yield (0, supertest_1.default)(index_1.default)
-                .post('/inventory/place_order')
+                .post('/inventory/items/place_order')
                 .set('authorization', 'bearer wrongtoken')
                 .send({
                 inventory_id: '1234',
@@ -194,7 +192,7 @@ describe('inventory', () => {
         it('should give respons 400 on wrong data type of qty ', () => __awaiter(void 0, void 0, void 0, function* () {
             sinon_1.default.stub(utils_1.default, 'verifyJWT').resolves();
             const response = yield (0, supertest_1.default)(index_1.default)
-                .post('/inventory/place_order')
+                .post('/inventory/items/place_order')
                 .set('authorization', 'bearer wrongtoken')
                 .send({
                 inventory_id: '1234',
@@ -212,7 +210,7 @@ describe('inventory', () => {
                 { item_id: '123', price: 10, qty: 0, item_name: 'mango' },
             ]);
             const response = yield (0, supertest_1.default)(index_1.default)
-                .post('/inventory/place_order')
+                .post('/inventory/items/place_order')
                 .set('authorization', 'bearer wrongtoken')
                 .send({
                 inventory_id: '123',
@@ -232,7 +230,7 @@ describe('inventory', () => {
                 { item_id: '123', price: 10, qty: 20, item_name: 'mango' },
             ]);
             const response = yield (0, supertest_1.default)(index_1.default)
-                .post('/inventory/place_order')
+                .post('/inventory/items/place_order')
                 .set('authorization', 'bearer wrongtoken')
                 .send({
                 inventory_id: '123',
@@ -260,7 +258,7 @@ describe('inventory', () => {
                 .resolves();
             sinon_1.default.stub(user_queries_1.default, 'update_user_balance').resolves();
             const response = yield (0, supertest_1.default)(index_1.default)
-                .post('/inventory/place_order')
+                .post('/inventory/items/place_order')
                 .set('authorization', 'bearer wrongtoken')
                 .send({
                 inventory_id: '123',
@@ -273,7 +271,7 @@ describe('inventory', () => {
             sinon_1.default.stub(utils_1.default, 'verifyJWT').resolves();
             sinon_1.default.stub(user_queries_1.default, 'get_user_by_email').throwsException();
             const response = yield (0, supertest_1.default)(index_1.default)
-                .post('/inventory/place_order')
+                .post('/inventory/items/place_order')
                 .set('authorization', 'bearer wrongtoken')
                 .send({
                 inventory_id: '1234',

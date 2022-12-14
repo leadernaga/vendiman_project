@@ -13,8 +13,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const connection_1 = __importDefault(require("../../configs/connection"));
-function get_user_by_email(email) {
+function get_user_by_email(email, req) {
     return __awaiter(this, void 0, void 0, function* () {
+        req.logger.info('user in get_user_by_email query');
         return yield connection_1.default.select('*').where('email', email).from('users').first();
     });
 }
@@ -23,8 +24,9 @@ function update_user_token(email, token) {
         return yield (0, connection_1.default)('users').update({ token: token }).where('email', email);
     });
 }
-function update_user_balance(email, balance) {
+function update_user_balance(email, balance, req) {
     return __awaiter(this, void 0, void 0, function* () {
+        req.logger.info("user request in update_user_balance query");
         return connection_1.default
             .select('*')
             .from('users')

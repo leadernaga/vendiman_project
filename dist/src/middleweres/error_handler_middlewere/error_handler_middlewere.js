@@ -28,7 +28,6 @@ function error_handler_middlewere(error, req, res, next) {
                 .status(error.status || status_codes_1.default.internal_error)
                 .send({ message });
         }
-        next();
     });
 }
 exports.default = error_handler_middlewere;

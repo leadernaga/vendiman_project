@@ -13,18 +13,23 @@ exports.down = exports.up = void 0;
 function up(knex) {
     return __awaiter(this, void 0, void 0, function* () {
         return knex.schema.createTable('inventory_items', (table) => {
-            table.uuid('inventory_items_id').defaultTo(knex.raw('gen_random_uuid()'));
+            table
+                .uuid('inventory_items_id')
+                .defaultTo(knex.raw('gen_random_uuid()'));
             table
                 .uuid('inventory_id')
+                .notNullable()
                 .references('inventory_id')
                 .inTable('inventory')
                 .onDelete('CASCADE');
             table
                 .uuid('item_id')
+                .notNullable()
                 .references('item_id')
                 .inTable('items')
                 .onDelete('CASCADE');
             table.integer('qty').notNullable().defaultTo(0);
+            table.unique(['item_id', 'inventory_id']);
             table.timestamps(true, true);
         });
     });

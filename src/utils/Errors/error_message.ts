@@ -10,9 +10,10 @@ const obj = {
     less_balance: 'user dont have enough balance',
     invalid_email: 'please provide valid email address',
     user_notfound: 'user not found please register',
-    invalid_otp: 'please enter correct otp',
+    invalid_otp: 'please enter correct otp or otp expired',
     no_otp_generated: 'please click on get otp',
     invalid_email_otp: 'please enter valid email and otp',
+    email_sending_failed: 'cant send email please try again',
 }
 
 export default obj

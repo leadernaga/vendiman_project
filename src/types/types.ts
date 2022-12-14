@@ -24,3 +24,7 @@ export interface place_order {
     user_id: string
     order_id: string
 }
+
+export interface database_error {
+    code: number | string
+}
